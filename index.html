@@ -1,74 +1,264 @@
+
+<!DOCTYPE html>
+
 <html>
 <head>
-<title>Lights, Camera, Action!</title>
-<script>
-
-var video;
-
-// Alias the vendor prefixed variants of getUserMedia so we can access them
-// via navigator.getUserMedia
-navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||
-  navigator.mozGetUserMedia || navigator.msGetUserMedia;
-
-// Alias the vendor prefixed variants of the URL object so that we can access them
-// via window.URL
-window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL;
-
-function showStatus(s) {
-  document.querySelector("#status").innerHTML = s;
+<meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="chrome=1" />
+<link href="../common.css" rel="stylesheet" type="text/css" media="all">
+<title>Record a getUserMedia() Session</title>
+<style>
+a[download] {
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: bold;
 }
-
-// This function will be called if a webcam is available and the user has
-// granted access for the web application to use it.
-function successCallback(stream) {
-  // Firefox has a special property that you can use to associate the stream with the
-  // video object.  Other browsers require you to use createObjectURL.
-  if (video.mozSrcObject !== undefined) {
-    video.mozSrcObject = stream;
-  }
-  else {
-    video.src = (window.URL && window.URL.createObjectURL(stream)) || stream;
-  }
-  video.play();
-  showStatus("You should be seeing video from your camera.");
+h4 {
+  padding: 15px;
+  background: black;
+  color: white;
+  margin: 10px 0 10px 0;
+  border-radius: 100px 0 100px 0;
+  letter-spacing: 1px;
+  font-weight: 300;
 }
-
-
-// This function will be called if there is no webcam available or the user has
-// denied access for the web application to use it.
-function failureCallback() {
-  showStatus("No camera is available or you have denied access.");
+section > div {
+  text-align: center;
+  display: inline-block;
+  margin: 0 15px;
+  min-width: 400px;
 }
-
-function onLoad() {
-  showStatus("Waiting for you to grant access to the camera...");
-
-  // Get the DOM object that matches the first video tag on the page
-  video = document.querySelector('video');
-
-  // We can retrieve the video dimensions from the video object once we have
-  // registered for and received the loadeddata event
-  video.addEventListener('loadeddata', function(e) {
-    console.log('Video dimensions: ' + video.videoWidth + ' x ' + video.videoHeight);
-    }, false);
-
-  if (navigator.getUserMedia) {
-    // Ask the user for access to the camera
-    navigator.getUserMedia({video: true}, successCallback, failureCallback);
-  }
-  else {
-    showStatus('The navigator.getUserMedia() method not supported in this browser.');
-  }
+#video-preview {
+  height: 300px;
 }
-</script>
+button.recording {
+  color: darkred;
+  border-color: red;
+}
+section {
+  margin-top: 2em;
+}
+h2 {
+  text-align: center;
+}
+</style>
 </head>
+<body>
 
-<body onload="onLoad();">
-<h1>Lights, Camera, Action!</h1>
-<a href="http://www.storminthecastle.com/2013/03/23/lights-camera-action/">Article and Sample App by John Robinson.</a><br/>
-<br/>
-Status: <span id="status"></span><br/>
-<video/>
+<details>
+  <summary>What's this?</summary>
+  <div>
+    <p>An example of creating a .webm movie from a <code>getUserMedia()</code> video capture.</p>
+    <p><b>Support:</b> Chrome 21 supports <code>getUserMedia()</code>.</p>
+  </div>
+</details>
 
+<h2>Recording .webm video from a <code>getUserMedia()</code>.</h2>
+
+<section>
+<div style="float:left;">
+  <button id="camera-me">1. Turn on camera</button>
+  <h4><code>getUserMedia()</code> feed</h4>
+  <video autoplay></video>
+</div>
+<div id="video-preview">
+  <button id="record-me" disabled>2. Record<!--⚫--></button>
+  <button id="stop-me" disabled>◼</button>
+  <!--<button id="play-me" disabled>►</button>-->
+  <span id="elasped-time"></span>
+  <h4>.webm recording (no audio)</h4>
+</div>
+</section>
+
+<!--<script src="libwebp-0.1.3.min.js"></script>-->
+<!--<script src="whammy.min.js"></script>-->
+<script>
+    var Whammy=function(){function g(a){for(var b=a[0].width,e=a[0].height,c=a[0].duration,d=1;d<a.length;d++){if(a[d].width!=b)throw"Frame "+(d+1)+" has a different width";if(a[d].height!=e)throw"Frame "+(d+1)+" has a different height";if(0>a[d].duration)throw"Frame "+(d+1)+" has a weird duration";c+=a[d].duration}var f=0,a=[{id:440786851,data:[{data:1,id:17030},{data:1,id:17143},{data:4,id:17138},{data:8,id:17139},{data:"webm",id:17026},{data:2,id:17031},{data:2,id:17029}]},{id:408125543,data:[{id:357149030,
+data:[{data:1E6,id:2807729},{data:"whammy",id:19840},{data:"whammy",id:22337},{data:[].slice.call(new Uint8Array((new Float64Array([c])).buffer),0).map(function(a){return String.fromCharCode(a)}).reverse().join(""),id:17545}]},{id:374648427,data:[{id:174,data:[{data:1,id:215},{data:1,id:25541},{data:0,id:156},{data:"und",id:2274716},{data:"V_VP8",id:134},{data:"VP8",id:2459272},{data:1,id:131},{id:224,data:[{data:b,id:176},{data:e,id:186}]}]}]},{id:524531317,data:[{data:0,id:231}].concat(a.map(function(a){var b;
+b=a.data.slice(4);var c=Math.round(f);b=[129,c>>8,c&255,128].map(function(a){return String.fromCharCode(a)}).join("")+b;f+=a.duration;return{data:b,id:163}}))}]}];return j(a)}function m(a){for(var b=[];0<a;)b.push(a&255),a>>=8;return new Uint8Array(b.reverse())}function k(a){for(var b=[],a=(a.length%8?Array(9-a.length%8).join("0"):"")+a,e=0;e<a.length;e+=8)b.push(parseInt(a.substr(e,8),2));return new Uint8Array(b)}function j(a){for(var b=[],e=0;e<a.length;e++){var c=a[e].data;"object"==typeof c&&
+(c=j(c));"number"==typeof c&&(c=k(c.toString(2)));if("string"==typeof c){for(var d=new Uint8Array(c.length),f=0;f<c.length;f++)d[f]=c.charCodeAt(f);c=d}f=c.size||c.byteLength;d=Math.ceil(Math.ceil(Math.log(f)/Math.log(2))/8);f=f.toString(2);f=Array(7*d+8-f.length).join("0")+f;d=Array(d).join("0")+"1"+f;b.push(m(a[e].id));b.push(k(d));b.push(c)}return new Blob(b,{type:"video/webm"})}function l(a){for(var b=a.RIFF[0].WEBP[0],e=b.indexOf("\u009d\u0001*"),c=0,d=[];4>c;c++)d[c]=b.charCodeAt(e+3+c);c=d[1]<<
+8|d[0];e=c&16383;c=d[3]<<8|d[2];return{width:e,height:c&16383,data:b,riff:a}}function h(a){for(var b=0,e={};b<a.length;){var c=a.substr(b,4),d=parseInt(a.substr(b+4,4).split("").map(function(a){a=a.charCodeAt(0).toString(2);return Array(8-a.length+1).join("0")+a}).join(""),2),f=a.substr(b+4+4,d),b=b+(8+d);e[c]=e[c]||[];"RIFF"==c||"LIST"==c?e[c].push(h(f)):e[c].push(f)}return e}function i(a,b){this.frames=[];this.duration=1E3/a;this.quality=b||0.8}i.prototype.add=function(a,b){if("undefined"!=typeof b&&
+this.duration)throw"you can't pass a duration if the fps is set";if("undefined"==typeof b&&!this.duration)throw"if you don't have the fps set, you ned to have durations here.";a.canvas&&(a=a.canvas);if(a.toDataURL)a=a.toDataURL("image/webp",this.quality);else if("string"!=typeof a)throw"frame must be a a HTMLCanvasElement, a CanvasRenderingContext2D or a DataURI formatted string";if(!/^data:image\/webp;base64,/ig.test(a))throw"Input must be formatted properly as a base64 encoded DataURI of type image/webp";
+this.frames.push({image:a,duration:b||this.duration})};i.prototype.compile=function(){return new g(this.frames.map(function(a){var b=l(h(atob(a.image.slice(23))));b.duration=a.duration;return b}))};return{Video:i,fromImageArray:function(a,b){return g(a.map(function(a){a=l(h(atob(a.slice(23))));a.duration=1E3/b;return a}))},toWebM:g}}();
+</script>
+<script>
+(function(exports) {
+
+exports.URL = exports.URL || exports.webkitURL;
+
+exports.requestAnimationFrame = exports.requestAnimationFrame ||
+    exports.webkitRequestAnimationFrame || exports.mozRequestAnimationFrame ||
+    exports.msRequestAnimationFrame || exports.oRequestAnimationFrame;
+
+exports.cancelAnimationFrame = exports.cancelAnimationFrame ||
+    exports.webkitCancelAnimationFrame || exports.mozCancelAnimationFrame ||
+    exports.msCancelAnimationFrame || exports.oCancelAnimationFrame;
+
+navigator.getUserMedia = navigator.getUserMedia ||
+    navigator.webkitGetUserMedia || navigator.mozGetUserMedia ||
+    navigator.msGetUserMedia;
+
+var ORIGINAL_DOC_TITLE = document.title;
+var video = $('video');
+var canvas = document.createElement('canvas'); // offscreen canvas.
+var rafId = null;
+var startTime = null;
+var endTime = null;
+var frames = [];
+
+function $(selector) {
+  return document.querySelector(selector) || null;
+}
+
+function toggleActivateRecordButton() {
+  var b = $('#record-me');
+  b.textContent = b.disabled ? 'Record' : 'Recording...';
+  b.classList.toggle('recording');
+  b.disabled = !b.disabled;
+}
+
+function turnOnCamera(e) {
+  e.target.disabled = true;
+  $('#record-me').disabled = false;
+
+  video.controls = false;
+
+  var finishVideoSetup_ = function() {
+    // Note: video.onloadedmetadata doesn't fire in Chrome when using getUserMedia so
+    // we have to use setTimeout. See crbug.com/110938.
+    setTimeout(function() {
+      video.width = 320;//video.clientWidth;
+      video.height = 240;// video.clientHeight;
+      // Canvas is 1/2 for performance. Otherwise, getImageData() readback is
+      // awful 100ms+ as 640x480.
+      canvas.width = video.width;
+      canvas.height = video.height;
+    }, 1000);
+  };
+
+  navigator.getUserMedia({video: true, audio: true}, function(stream) {
+    video.src = window.URL.createObjectURL(stream);
+    finishVideoSetup_();
+  }, function(e) {
+    alert('Fine, you get a movie instead of your beautiful face ;)');
+
+    video.src = 'Chrome_ImF.mp4';
+    finishVideoSetup_();
+  });
+};
+
+function record() {
+  var elapsedTime = $('#elasped-time');
+  var ctx = canvas.getContext('2d');
+  var CANVAS_HEIGHT = canvas.height;
+  var CANVAS_WIDTH = canvas.width;
+
+  frames = []; // clear existing frames;
+  startTime = Date.now();
+
+  toggleActivateRecordButton();
+  $('#stop-me').disabled = false;
+
+  function drawVideoFrame_(time) {
+    rafId = requestAnimationFrame(drawVideoFrame_);
+
+    ctx.drawImage(video, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+    document.title = 'Recording...' + Math.round((Date.now() - startTime) / 1000) + 's';
+
+    // Read back canvas as webp.
+    //console.time('canvas.dataURL() took');
+    var url = canvas.toDataURL('image/webp', 1); // image/jpeg is way faster :(
+    //console.timeEnd('canvas.dataURL() took');
+    frames.push(url);
+ 
+    // UInt8ClampedArray (for Worker).
+    //frames.push(ctx.getImageData(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT).data);
+
+    // ImageData
+    //frames.push(ctx.getImageData(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT));
+  };
+
+  rafId = requestAnimationFrame(drawVideoFrame_);
+};
+
+function stop() {
+  cancelAnimationFrame(rafId);
+  endTime = Date.now();
+  $('#stop-me').disabled = true;
+  document.title = ORIGINAL_DOC_TITLE;
+
+  toggleActivateRecordButton();
+
+  console.log('frames captured: ' + frames.length + ' => ' +
+              ((endTime - startTime) / 1000) + 's video');
+
+  embedVideoPreview();
+};
+
+function embedVideoPreview(opt_url) {
+  var url = opt_url || null;
+  var video = $('#video-preview video') || null;
+  var downloadLink = $('#video-preview a[download]') || null;
+
+  if (!video) {
+    video = document.createElement('video');
+    video.autoplay = true;
+    video.controls = true;
+    video.loop = true;
+    //video.style.position = 'absolute';
+    //video.style.top = '70px';
+    //video.style.left = '10px';
+    video.style.width = canvas.width + 'px';
+    video.style.height = canvas.height + 'px';
+    $('#video-preview').appendChild(video);
+    
+    downloadLink = document.createElement('a');
+    downloadLink.download = 'capture.webm';
+    downloadLink.textContent = '[ download video ]';
+    downloadLink.title = 'Download your .webm video';
+    var p = document.createElement('p');
+    p.appendChild(downloadLink);
+
+    $('#video-preview').appendChild(p);
+
+  } else {
+    window.URL.revokeObjectURL(video.src);
+  }
+
+  // https://github.com/antimatter15/whammy
+  // var encoder = new Whammy.Video(1000/60);
+  // frames.forEach(function(dataURL, i) {
+  //   encoder.add(dataURL);
+  // });
+  // var webmBlob = encoder.compile();
+
+  if (!url) {
+    var webmBlob = Whammy.fromImageArray(frames, 1000 / 60);
+    url = window.URL.createObjectURL(webmBlob);
+  }
+
+  video.src = url;
+  downloadLink.href = url;
+}
+
+function initEvents() {
+  $('#camera-me').addEventListener('click', turnOnCamera);
+  $('#record-me').addEventListener('click', record);
+  $('#stop-me').addEventListener('click', stop);
+}
+
+initEvents();
+
+exports.$ = $;
+
+})(window);
+
+</script>
+
+<!--[if IE]>
+<script src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js"></script>
+<script>CFInstall.check({mode: 'overlay'});</script>
+<![endif]-->
 </body>
 </html>

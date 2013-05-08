@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>test camera</title>
+</head>
+<body>
+<div id="btn">Test</div>
+<video autoplay></video>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script src="webcam.js"></script>
+<script>
+    $(document).ready(function() {
+        var cam = new Webcam({
+            type: 0,
+            element: $('f')
+        });
+
+        $('#btn').on('click', function(e){
+            cam.ToggleCamera(e, true);
+        })
+    });
+</script>
+</body>
+</html>

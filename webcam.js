@@ -74,28 +74,36 @@
         Record : function()
         {
             var elapsedTime = $('#elasped-time');
-            var ctx = canvas.getContext('2d');
-            var CANVAS_HEIGHT = canvas.height;
-            var CANVAS_WIDTH = canvas.width;
+            var ctx = this.canvas.getContext('2d');
+            var CANVAS_HEIGHT = this.canvas.height;
+            var CANVAS_WIDTH = this.canvas.width;
 
             this.frames = []; // clear existing frames;
             this.startTime = Date.now();
 
-            //toggleActivateRecordButton();
+            function toggleActivateRecordButton() {
+              console.log('toogle shit')
+                var b = $('#record-me');
+             // b.textContent = b.disabled ? 'Record' : 'Recording...';
+             // b.classList.toggle('recording');
+             // b.disabled = !b.disabled;
+            }
+
+            toggleActivateRecordButton();
             $('#stop-me').disabled = false;
 
             function drawVideoFrame_(time) {
                 this.rafId = requestAnimationFrame(drawVideoFrame_);
 
-                ctx.drawImage(video, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+                ctx.drawImage(scope.video, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-                document.title = 'Recording...' + Math.round((Date.now() - startTime) / 1000) + 's';
+                document.title = 'Recording...' + Math.round((Date.now() - scope.startTime) / 1000) + 's';
 
                 // Read back canvas as webp.
                 //console.time('canvas.dataURL() took');
-                var url = canvas.toDataURL('image/webp', 1); // image/jpeg is way faster :(
+                var url = scope.canvas.toDataURL('image/webp', 1); // image/jpeg is way faster :(
                 //console.timeEnd('canvas.dataURL() took');
-                frames.push(url);
+                scope.frames.push(url);
 
                 // UInt8ClampedArray (for Worker).
                 //frames.push(ctx.getImageData(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT).data);
@@ -105,6 +113,65 @@
             };
 
             this.rafId = requestAnimationFrame(drawVideoFrame_);
+        },
+
+        Stop : function()
+        {
+            cancelAnimationFrame(this.rafId);
+            endTime = Date.now();
+            $('#stop-me').disabled = true;
+            document.title = this.ORIGINAL_DOC_TITLE;
+
+            //toggleActivateRecordButton();
+
+            console.log('frames captured: ' + this.frames.length + ' => ' +
+                  ((endTime - this.startTime) / 1000) + 's video');
+
+            //preview video:
+            var url =  null;
+            //var video = $('#video-preview video') || null;
+            var downloadLink = $('#video-preview a[download]') || null;
+
+            //if (!video) {
+                video = document.createElement('video');
+                video.autoplay = true;
+                video.controls = true;
+                video.loop = true;
+                //video.style.position = 'absolute';
+                //video.style.top = '70px';
+                //video.style.left = '10px';
+                video.style.width = this.canvas.width + 'px';
+                video.style.height = this.canvas.height + 'px';
+                $('#video-preview').append(video);
+                console.log($('#video-preview'))
+
+                downloadLink = document.createElement('a');
+                downloadLink.download = 'capture.webm';
+                downloadLink.textContent = '[ download video ]';
+                downloadLink.title = 'Download your .webm video';
+
+                $('#video-preview').append(downloadLink);
+
+          //  }
+           // else
+           // {
+           //     window.URL.revokeObjectURL(video.src);
+           // }
+
+            // https://github.com/antimatter15/whammy
+            // var encoder = new Whammy.Video(1000/60);
+            // frames.forEach(function(dataURL, i) {
+            //   encoder.add(dataURL);
+            // });
+            // var webmBlob = encoder.compile();
+
+            if (!url) {
+                var webmBlob = Whammy.fromImageArray(scope.frames, 1000 / 60);
+                url = window.URL.createObjectURL(webmBlob);
+            }
+
+            video.src = url;
+            downloadLink.href = url;
         }
     };
 })(jQuery);

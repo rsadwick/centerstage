@@ -1,0 +1,74 @@
+<html>
+<head>
+<title>Lights, Camera, Action!</title>
+<script>
+
+var video;
+
+// Alias the vendor prefixed variants of getUserMedia so we can access them
+// via navigator.getUserMedia
+navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||
+  navigator.mozGetUserMedia || navigator.msGetUserMedia;
+
+// Alias the vendor prefixed variants of the URL object so that we can access them
+// via window.URL
+window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL;
+
+function showStatus(s) {
+  document.querySelector("#status").innerHTML = s;
+}
+
+// This function will be called if a webcam is available and the user has
+// granted access for the web application to use it.
+function successCallback(stream) {
+  // Firefox has a special property that you can use to associate the stream with the
+  // video object.  Other browsers require you to use createObjectURL.
+  if (video.mozSrcObject !== undefined) {
+    video.mozSrcObject = stream;
+  }
+  else {
+    video.src = (window.URL && window.URL.createObjectURL(stream)) || stream;
+  }
+  video.play();
+  showStatus("You should be seeing video from your camera.");
+}
+
+
+// This function will be called if there is no webcam available or the user has
+// denied access for the web application to use it.
+function failureCallback() {
+  showStatus("No camera is available or you have denied access.");
+}
+
+function onLoad() {
+  showStatus("Waiting for you to grant access to the camera...");
+
+  // Get the DOM object that matches the first video tag on the page
+  video = document.querySelector('video');
+
+  // We can retrieve the video dimensions from the video object once we have
+  // registered for and received the loadeddata event
+  video.addEventListener('loadeddata', function(e) {
+    console.log('Video dimensions: ' + video.videoWidth + ' x ' + video.videoHeight);
+    }, false);
+
+  if (navigator.getUserMedia) {
+    // Ask the user for access to the camera
+    navigator.getUserMedia({video: true}, successCallback, failureCallback);
+  }
+  else {
+    showStatus('The navigator.getUserMedia() method not supported in this browser.');
+  }
+}
+</script>
+</head>
+
+<body onload="onLoad();">
+<h1>Lights, Camera, Action!</h1>
+<a href="http://www.storminthecastle.com/2013/03/23/lights-camera-action/">Article and Sample App by John Robinson.</a><br/>
+<br/>
+Status: <span id="status"></span><br/>
+<video/>
+
+</body>
+</html>

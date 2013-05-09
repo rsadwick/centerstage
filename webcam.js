@@ -13,7 +13,6 @@
     Webcam = function (config) {
 
         config = (config = config || {});
-
         var ORIGINAL_DOC_TITLE = document.title;
         this.video = $('video').get(0);
         this.canvas = document.createElement('canvas'); // offscreen canvas.
@@ -27,8 +26,9 @@
     Webcam.prototype = {
         /**
          * ToggleCamera
-         * @classDescription: performs validation based on min/max and increases by step.
-         * @param {enum} type   enumeration based on the type of validation to perform (up/down)
+         * @classDescription: provides access to webcam.
+         * @param {event} e: the user event
+         * @param {boolean} toggle: on or off
          */
 
         ToggleCamera : function(e, toggle)
@@ -38,8 +38,6 @@
                 case true:
                     e.target.disabled = true;
                     this.disabled = false;
-
-                   // scope.video.controls = false;
 
                     navigator.getUserMedia({video: true, audio: true}, function(stream) {
                         scope.video.src = window.URL.createObjectURL(stream);
@@ -52,8 +50,8 @@
                     // Note: video.onloadedmetadata doesn't fire in Chrome when using getUserMedia so
                     // we have to use setTimeout. See crbug.com/110938.
                     setTimeout(function() {
-                        scope.video.width = 320;//video.clientWidth;
-                        scope.video.height = 240;// video.clientHeight;
+                        scope.video.width = 320;
+                        scope.video.height = 240;
                         // Canvas is 1/2 for performance. Otherwise, getImageData() readback is
                         // awful 100ms+ as 640x480.
                         scope.canvas.width = scope.video.width;
@@ -63,7 +61,9 @@
                     break;
 
                 case false:
-                    //turn off
+                    $('#webcam-vid').stop();
+                    $('#webcam-vid').pause();
+                    $('#webcam-vid').src="";
                     break;
 
                 default:
@@ -73,7 +73,6 @@
 
         Record : function()
         {
-            var elapsedTime = $('#elasped-time');
             var ctx = this.canvas.getContext('2d');
             var CANVAS_HEIGHT = this.canvas.height;
             var CANVAS_WIDTH = this.canvas.width;
@@ -81,19 +80,19 @@
             this.frames = []; // clear existing frames;
             this.startTime = Date.now();
 
+            //todo: get rid of this nub shit:
             function toggleActivateRecordButton() {
-              console.log('toogle shit')
-                var b = $('#record-me');
+                //var b = $('#record-me');
              // b.textContent = b.disabled ? 'Record' : 'Recording...';
              // b.classList.toggle('recording');
              // b.disabled = !b.disabled;
             }
 
-            toggleActivateRecordButton();
+           // toggleActivateRecordButton();
             $('#stop-me').disabled = false;
 
             function drawVideoFrame_(time) {
-                this.rafId = requestAnimationFrame(drawVideoFrame_);
+                scope.rafId = requestAnimationFrame(drawVideoFrame_);
 
                 ctx.drawImage(scope.video, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
@@ -127,6 +126,7 @@
             console.log('frames captured: ' + this.frames.length + ' => ' +
                   ((endTime - this.startTime) / 1000) + 's video');
 
+            //todo convert this crap into jquery:
             //preview video:
             var url =  null;
             //var video = $('#video-preview video') || null;
@@ -172,6 +172,11 @@
 
             video.src = url;
             downloadLink.href = url;
+            //scope.ToggleCamera(null, false);
+
+             $('#webcam-vid').stop();
+             $('#webcam-vid')[0].pause();
+             $('#webcam-vid')[0].src="";
         }
     };
 })(jQuery);
